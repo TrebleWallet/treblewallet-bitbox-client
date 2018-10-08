@@ -91,7 +91,7 @@ public class BitboxClient {
 		return output.toString();
 	}
 
-	SignDTO sign(String curve, String meta, List<HashKeyPathDTO> hasharray, List<PubKeyPathDTO> pubkey)
+	public SignDTO sign(String curve, String meta, List<HashKeyPathDTO> hasharray, List<PubKeyPathDTO> pubkey)
 			throws BitBoxException {
 		Map<String, String> parameters = new HashMap<>();
 		if (curve != null)
@@ -120,7 +120,7 @@ public class BitboxClient {
 	 * @return
 	 * @throws BitBoxException
 	 */
-	PubKeyDTO xpub(String keypath) throws BitBoxException {
+	public PubKeyDTO xpub(String keypath) throws BitBoxException {
 		Map<String, String> parameters = new HashMap<>();
 		parameters.put("keypath", keypath);
 		String resultString = runCmd("xpub", parameters);
@@ -140,7 +140,7 @@ public class BitboxClient {
 	 * @return
 	 * @throws BitBoxException
 	 */
-	InfoDTO info() throws BitBoxException {
+	public InfoDTO info() throws BitBoxException {
 		String resultString = runCmd("info", new HashMap<String, String>());
 		InfoDTO result = null;
 		try {

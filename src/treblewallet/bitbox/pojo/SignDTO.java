@@ -13,7 +13,9 @@ public class SignDTO {
 	private String echo;
 	
 	private String recid;
-	private String sig;
+	private SignaturesDTO[] sign;
+	
+	private ErrorDTO error;
 
 	public SignDTO() {
 	}
@@ -58,17 +60,26 @@ public class SignDTO {
 		this.recid = recid;
 	}
 
-	public String getSig() {
-		return sig;
+
+	public SignaturesDTO[] getSign() {
+		return sign;
 	}
 
-	public void setSig(String sig) {
-		this.sig = sig;
+	public void setSign(SignaturesDTO[] sign) {
+		this.sign = sign;
 	}
 
 	@Override
-	public java.lang.String toString() {
+	public String toString() {
 		return "SignDTO [meta=" + meta + ", data=" + Arrays.toString(data) + ", checkpub=" + Arrays.toString(checkpub)
-				+ ", echo=" + echo + ", recid=" + recid + ", sign=" + sig + "]";
+				+ ", echo=" + echo + ", recid=" + recid + ", sign=" + Arrays.toString(sign) + ", error=" + error + "]";
+	}
+
+	public ErrorDTO getError() {
+		return error;
+	}
+
+	public void setError(ErrorDTO error) {
+		this.error = error;
 	}
 }
