@@ -1,5 +1,3 @@
-package treblewallet.bitbox.main;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,20 +9,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import pojo.HashKeyPathDTO;
+import pojo.InfoDTO;
+import pojo.PubKeyDTO;
+import pojo.PubKeyPathDTO;
+import pojo.SignDTO;
 
-import treblewallet.bitbox.main.pojo.HashKeyPathDTO;
-import treblewallet.bitbox.main.pojo.InfoDTO;
-import treblewallet.bitbox.main.pojo.PubKeyDTO;
-import treblewallet.bitbox.main.pojo.PubKeyPathDTO;
-import treblewallet.bitbox.main.pojo.SignDTO;
 
 /**
  * The {@code BitboxClient} interfaces the Bitbox USB Hardware through the
  * command line. The current implementation supports windows. Linux should work
  * by adapting the folder separation character ('\' to '/').
  * 
- * TODO: Test for linux and adapt where necessary. TODO: migrate to github as a
- * library for re-use TODO: migrate to use the direct USB interface with JNI
+ * TODO: Test for linux and adapt where necessary. 
+ * 
+ * TODO: migrate to use the direct USB interface with JNI
  * using the hidapi interface like the CLI
  * 
  * @author milan
@@ -91,6 +90,16 @@ public class BitboxClient {
 		return output.toString();
 	}
 
+	/**
+	 * Signs an array of hashes for the given key paths and verifies with the public keys, if they are provided.
+	 * 
+	 * @param curve
+	 * @param meta
+	 * @param hasharray
+	 * @param pubkey
+	 * @return
+	 * @throws BitBoxException
+	 */
 	public SignDTO sign(String curve, String meta, List<HashKeyPathDTO> hasharray, List<PubKeyPathDTO> pubkey)
 			throws BitBoxException {
 		Map<String, String> parameters = new HashMap<>();

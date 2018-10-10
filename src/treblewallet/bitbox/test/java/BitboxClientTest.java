@@ -1,38 +1,27 @@
-package treblewallet.bitbox.test;
+import static org.junit.Assert.assertTrue;
 
-import com.bushidowallet.core.bitcoin.bip32.ExtendedKey;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.bitcoinj.core.DumpedPrivateKey;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Sha256Hash;
-import org.bitcoinj.core.Transaction;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+
 import org.bitcoinj.core.Utils;
-
-import org.bitcoinj.crypto.TransactionSignature;
-import org.bitcoinj.params.TestNet3Params;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import treblewallet.bitbox.main.BitBoxException;
-import treblewallet.bitbox.main.BitboxClient;
-import treblewallet.bitbox.main.pojo.HashKeyPathDTO;
-import treblewallet.bitbox.main.pojo.InfoDTO;
-import treblewallet.bitbox.main.pojo.PubKeyDTO;
-import treblewallet.bitbox.main.pojo.PubKeyPathDTO;
-import treblewallet.bitbox.main.pojo.SignDTO;
 
-import java.io.IOException;
-import java.util.Base64;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
+import com.bushidowallet.core.bitcoin.bip32.ECKey;
+import com.bushidowallet.core.bitcoin.bip32.ExtendedKey;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import pojo.HashKeyPathDTO;
+import pojo.InfoDTO;
+import pojo.PubKeyDTO;
+import pojo.PubKeyPathDTO;
+import pojo.SignDTO;
 
 public class BitboxClientTest {
 
@@ -41,21 +30,18 @@ public class BitboxClientTest {
 	private static final String KEY_PATH = "m/44p/1/0/0/1";
 
 	private static final String TEST_HASH = "f6f4a3633eda92eef9dd96858dec2f5ea4dfebb67adac879c964194eb3b97d79";
-	private static final String TEST_HASH_KEY_PATH_SIG = "0b03b3ad0205b63d359220d8ee4b42cfd43caa40a16d4316f06cf"
-			+ "0270ecd09462a88bb3c6f6656e4649550ce74f9ae65cfe13ad49b65027193996caaf0a58cb5";
+
 	private static Logger log = LoggerFactory.getLogger(BitboxClientTest.class);
 
 	private static BitboxClient client;
 
 	private static String HSM_PASSWORD = "0000";
-	private static NetworkParameters params;
 
 	static Random rand = new Random();
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		client = new BitboxClient(HSM_PASSWORD);
-		params = TestNet3Params.get();
 	}
 
 	@AfterClass
@@ -77,7 +63,7 @@ public class BitboxClientTest {
 
 	/**
 	 * Check how many keys per second can be created.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -101,32 +87,6 @@ public class BitboxClientTest {
 		}
 	}
 
-	byte[] generateRandomByteArray(int length) {
-
-		byte[] hash = Utils.HEX.decode(TEST_HASH);
-		// byte[] hash = new byte[length];
-		// for (int i = 0; i < hash.length; i++) {
-		// hash[i] = (byte) rand.nextInt();
-		// }
-		return hash;
-	}
-
-	@Test
-	public void testSigning() throws BitBoxException {
-		// PubKeyDTO xpub = client.xpub(KEY_PATH);
-		String hash = Utils.HEX.encode(generateRandomByteArray(32));
-		String keyPath = KEY_PATH;
-		String curve = "secp256k1";
-		String meta = null;
-		List<HashKeyPathDTO> hashKeyPaths = new LinkedList<>();
-		hashKeyPaths.add(new HashKeyPathDTO(hash, keyPath));
-		List<PubKeyPathDTO> pubKeyPaths = new LinkedList<>();
-		SignDTO signDTO = client.sign(curve, meta, hashKeyPaths, pubKeyPaths);
-		log.info("BITBOX SIGN: {}", signDTO);
-		SignDTO signDTO2 = client.sign(curve, meta, hashKeyPaths, pubKeyPaths);
-		log.info("BITBOX SIGN: {}", signDTO2);
-	}
-
 	@Test
 	public void testParseSign() throws JsonParseException, JsonMappingException, IOException {
 		String json = "{  \"sign\": [    {      \"sig\": \"11a8d73b55d4517c44b30c4c616ed5d2b9ad6b72966586682dee2f72633098b631d36454cb3c6378c2b48783de4fbe5234ac98bf27f0d1e612066f6ebd75b869\",      \"recid\": \"00\"    }  ]}";
@@ -141,7 +101,7 @@ public class BitboxClientTest {
 	}
 
 	@Test
-	public void testSig() throws Exception {
+	public void testSigning() throws Exception {
 		// get pub key
 		PubKeyDTO xpub = client.xpub(KEY_PATH);
 		log.info("xpub: {}", xpub);
@@ -152,32 +112,28 @@ public class BitboxClientTest {
 		log.info("key2: {}", key2);
 
 		// sign message
-		String hash = Utils.HEX.encode(generateRandomByteArray(32));
+		String hashString = TEST_HASH;
 		String keyPath = KEY_PATH;
 		String curve = "secp256k1";
 		String meta = null;
 		List<HashKeyPathDTO> hashKeyPaths = new LinkedList<>();
-		hashKeyPaths.add(new HashKeyPathDTO(hash, keyPath));
+		hashKeyPaths.add(new HashKeyPathDTO(hashString, keyPath));
 		List<PubKeyPathDTO> pubKeyPaths = new LinkedList<>();
 		SignDTO signDTO = client.sign(curve, meta, hashKeyPaths, pubKeyPaths);
 		log.info("BITBOX SIGN: {}", signDTO);
-		byte[] echo = Base64.getDecoder().decode(signDTO.getEcho());
-		String echoString = new String(echo);
-		log.info("echo: {}", echoString);
-		
 		SignDTO signDTO2 = client.sign(curve, meta, hashKeyPaths, pubKeyPaths);
 		log.info("BITBOX SIGN: {}", signDTO2);
-		
-		// validate signature with public key and signature
 
-		Sha256Hash sighash  = Sha256Hash.wrap(hash);
-		ECKey privateKey = DumpedPrivateKey.fromBase58(params, privateKeyBase58).getKey();
-		ECKey.ECDSASignature ecdsaSignature = privateKey.sign(sighash);
+		// verify signature with public key and signature
+		String sigHex = signDTO2.getSign()[0].getSig();
+		byte[] sig = Utils.HEX.decode(sigHex);
+		byte[] sigDes = util.Utils.convertSigFromRawToDER(sig);
+		byte[] hash = Utils.HEX.decode(TEST_HASH);
+		ECKey eckey = key2.getECKey();
 
-		// Add the second signature to the signature list
-		TransactionSignature signature = new TransactionSignature(ecdsaSignature, Transaction.SigHash.ALL, false);
-		assertEquals(signDTO2.getEcho(), Base64.getEncoder().encode(signature.encodeToDER()));
-
+		boolean verification = eckey.verify(hash, sigDes);
+		log.info("verification successful: {}", verification);
+		assertTrue("can't verify signature {" + sigDes + "} with this key: {" + eckey + "}", verification);
 	}
 
 	// @Test

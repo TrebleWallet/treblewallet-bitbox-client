@@ -1,4 +1,4 @@
-package treblewallet.bitbox.main.util;
+package util;
 
 public class OSValidator {
 
