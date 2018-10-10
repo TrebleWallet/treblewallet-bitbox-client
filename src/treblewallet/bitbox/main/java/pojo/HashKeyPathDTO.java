@@ -5,8 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import treblewallet.bitbox.util.BitBoxUtil;
+import util.BitBoxUtil;
 
 /*
  * Created by Robert Juhas on 7/24/2018
