@@ -23,8 +23,9 @@ import treblewallet.bitbox.pojo.SignDTO;
  * command line. The current implementation supports windows. Linux should work
  * by adapting the folder separation character ('\' to '/').
  * 
- * TODO: Test for linux and adapt where necessary. TODO: migrate to github as a
- * library for re-use TODO: migrate to use the direct USB interface with JNI
+ * TODO: Test for linux and adapt where necessary. 
+ * 
+ * TODO: migrate to use the direct USB interface with JNI
  * using the hidapi interface like the CLI
  * 
  * @author milan
@@ -91,6 +92,16 @@ public class BitboxClient {
 		return output.toString();
 	}
 
+	/**
+	 * Signs an array of hashes for the given key paths and verifies with the public keys, if they are provided.
+	 * 
+	 * @param curve
+	 * @param meta
+	 * @param hasharray
+	 * @param pubkey
+	 * @return
+	 * @throws BitBoxException
+	 */
 	public SignDTO sign(String curve, String meta, List<HashKeyPathDTO> hasharray, List<PubKeyPathDTO> pubkey)
 			throws BitBoxException {
 		Map<String, String> parameters = new HashMap<>();
