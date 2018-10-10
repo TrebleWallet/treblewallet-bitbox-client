@@ -1,12 +1,12 @@
-package treblewallet.bitbox;
+package treblewallet.bitbox.main;
 
 import java.util.List;
 
-import treblewallet.bitbox.pojo.HashKeyPathDTO;
-import treblewallet.bitbox.pojo.InfoDTO;
-import treblewallet.bitbox.pojo.PubKeyDTO;
-import treblewallet.bitbox.pojo.PubKeyPathDTO;
-import treblewallet.bitbox.pojo.SignDTO;
+import treblewallet.bitbox.main.pojo.HashKeyPathDTO;
+import treblewallet.bitbox.main.pojo.InfoDTO;
+import treblewallet.bitbox.main.pojo.PubKeyDTO;
+import treblewallet.bitbox.main.pojo.PubKeyPathDTO;
+import treblewallet.bitbox.main.pojo.SignDTO;
 
 /*
  * Created by Robert Juhas on 7/24/2018
