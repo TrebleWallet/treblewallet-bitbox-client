@@ -1,4 +1,4 @@
-package pojo;
+package treblewallet.bitbox.main.java.pojo;
 
 public class ErrorDTO {
 	String message;

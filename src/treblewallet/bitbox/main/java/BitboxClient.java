@@ -1,3 +1,5 @@
+package treblewallet.bitbox.main.java;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,11 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import pojo.HashKeyPathDTO;
-import pojo.InfoDTO;
-import pojo.PubKeyDTO;
-import pojo.PubKeyPathDTO;
-import pojo.SignDTO;
+
+import treblewallet.bitbox.main.java.pojo.HashKeyPathDTO;
+import treblewallet.bitbox.main.java.pojo.InfoDTO;
+import treblewallet.bitbox.main.java.pojo.PubKeyDTO;
+import treblewallet.bitbox.main.java.pojo.PubKeyPathDTO;
+import treblewallet.bitbox.main.java.pojo.SignDTO;
 
 
 /**

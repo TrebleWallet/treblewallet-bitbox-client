@@ -1,3 +1,5 @@
+package treblewallet.bitbox.test.java;
+
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -17,11 +19,12 @@ import com.bushidowallet.core.bitcoin.bip32.ExtendedKey;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import pojo.HashKeyPathDTO;
-import pojo.InfoDTO;
-import pojo.PubKeyDTO;
-import pojo.PubKeyPathDTO;
-import pojo.SignDTO;
+import treblewallet.bitbox.main.java.BitboxClient;
+import treblewallet.bitbox.main.java.pojo.HashKeyPathDTO;
+import treblewallet.bitbox.main.java.pojo.InfoDTO;
+import treblewallet.bitbox.main.java.pojo.PubKeyDTO;
+import treblewallet.bitbox.main.java.pojo.PubKeyPathDTO;
+import treblewallet.bitbox.main.java.pojo.SignDTO;
 
 public class BitboxClientTest {
 
@@ -127,7 +130,7 @@ public class BitboxClientTest {
 		// verify signature with public key and signature
 		String sigHex = signDTO2.getSign()[0].getSig();
 		byte[] sig = Utils.HEX.decode(sigHex);
-		byte[] sigDes = util.Utils.convertSigFromRawToDER(sig);
+		byte[] sigDes = treblewallet.bitbox.main.java.util.Utils.convertSigFromRawToDER(sig);
 		byte[] hash = Utils.HEX.decode(TEST_HASH);
 		ECKey eckey = key2.getECKey();
 

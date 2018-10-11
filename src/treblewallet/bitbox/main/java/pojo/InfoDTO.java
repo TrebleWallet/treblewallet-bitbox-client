@@ -1,4 +1,4 @@
-package pojo;
+package treblewallet.bitbox.main.java.pojo;
 
 import java.util.HashMap;
 import java.util.Map;
