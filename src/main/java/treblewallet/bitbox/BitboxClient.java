@@ -34,16 +34,15 @@ import treblewallet.bitbox.pojo.SignDTO;
  */
 public class BitboxClient {
 	private static Logger log = LoggerFactory.getLogger(BitboxClient.class);
-
-	private static final String BITBOX_CLI_LOCATION = "C:\\Users\\milan\\Documents\\eclipse-workspace\\"
-			+ "treble-server\\dist\\bitbox\\BitBox_CLI_3.0.0_Win64.exe";
+	private String BITBOX_CLI_LOCATION;
 	private String password = "0000";
 
 	static ObjectMapper objectMapper = new ObjectMapper();
 
-	public BitboxClient(String password) {
+	public BitboxClient(String password, String bitboxCLILocation) {
 		super();
 		this.password = password;
+		this.BITBOX_CLI_LOCATION = bitboxCLILocation;
 	}
 
 	private String runCmd(String command, Map<String, String> parameters) throws BitBoxException {
