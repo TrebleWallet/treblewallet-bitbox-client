@@ -126,7 +126,7 @@ public class BitboxClientTest {
 		log.info("BITBOX SIGN: {}", signDTO2);
 
 		// verify signature with public key and signature
-		String sigHex = signDTO2.getSign()[0].getSig(); 
+		String sigHex = signDTO2.getSign()[0].getSig();
 		byte[] sig = Utils.HEX.decode(sigHex);
 		byte[] sigDes = treblewallet.bitbox.main.java.util.Utils.convertSigFromRawToDER(sig);
 		byte[] hash = Utils.HEX.decode(TEST_HASH);
