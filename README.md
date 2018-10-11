@@ -7,4 +7,4 @@ The CLI executables can be found here: https://digitalbitbox.com/download/client
 
 The API description for the Bitbox is here: https://shiftcrypto.ch/api
 
-ATTENTION: To make the adapter work, you need to add the java compiler option -parameters. This is to allow an annotation free interface description.
+Tested with Bitbox firmware version 3 or newer.
