@@ -1,4 +1,4 @@
-package pojo;
+package treblewallet.bitbox.pojo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;

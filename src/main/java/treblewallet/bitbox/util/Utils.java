@@ -1,4 +1,4 @@
-package util;
+package treblewallet.bitbox.util;
 
 public class Utils {
 	/**

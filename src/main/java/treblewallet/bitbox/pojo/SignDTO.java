@@ -1,4 +1,4 @@
-package pojo;
+package treblewallet.bitbox.pojo;
 
 import java.util.Arrays;
 

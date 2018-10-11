@@ -1,3 +1,5 @@
+package treblewallet.bitbox;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,15 +12,15 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import pojo.HashKeyPathDTO;
-import pojo.InfoDTO;
-import pojo.PubKeyDTO;
-import pojo.PubKeyPathDTO;
-import pojo.SignDTO;
+import treblewallet.bitbox.pojo.HashKeyPathDTO;
+import treblewallet.bitbox.pojo.InfoDTO;
+import treblewallet.bitbox.pojo.PubKeyDTO;
+import treblewallet.bitbox.pojo.PubKeyPathDTO;
+import treblewallet.bitbox.pojo.SignDTO;
 
 
 /**
- * The {@code BitboxClient} interfaces the Bitbox USB Hardware through the
+ * The {@code treblewallet.bitbox.BitboxClient} interfaces the Bitbox USB Hardware through the
  * command line. The current implementation supports windows. Linux should work
  * by adapting the folder separation character ('\' to '/').
  * 

@@ -1,3 +1,5 @@
+package treblewallet.bitbox;
+
 public class BitBoxException extends Exception {
 
 	private static final long serialVersionUID = -3959817647990175128L;

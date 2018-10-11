@@ -1,4 +1,4 @@
-package pojo;
+package treblewallet.bitbox.pojo;
 
 public class SignaturesDTO {
 	String sig;
