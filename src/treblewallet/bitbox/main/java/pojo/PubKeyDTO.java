@@ -1,4 +1,4 @@
-package treblewallet.bitbox.main.java.pojo;
+package pojo;
 
 /*
  * Created by Robert Juhas on 7/24/2018

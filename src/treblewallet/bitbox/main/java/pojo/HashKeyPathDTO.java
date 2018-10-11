@@ -1,4 +1,4 @@
-package treblewallet.bitbox.main.java.pojo;
+package pojo;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import treblewallet.bitbox.main.java.util.BitBoxUtil;
+import util.BitBoxUtil;
 
 /*
  * Created by Robert Juhas on 7/24/2018
