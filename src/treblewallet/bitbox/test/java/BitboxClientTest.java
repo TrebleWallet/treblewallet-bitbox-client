@@ -132,7 +132,7 @@ public class BitboxClientTest {
 		byte[] sig = Utils.HEX.decode(sigHex);
 		byte[] sigDes = treblewallet.bitbox.main.java.util.Utils.convertSigFromRawToDER(sig);
 		byte[] hash = Utils.HEX.decode(TEST_HASH);
-		ECKey eckey = key2.getECKey();
+		ECKey eckey = new ECKey(key2.getPublic(), false, false);
 
 		boolean verification = eckey.verify(hash, sigDes);
 		log.info("verification successful: {}", verification);
