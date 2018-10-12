@@ -30,8 +30,7 @@ public class BitboxClientTest {
 
     private static final String KEY_PATH = "m/44p/1/0/0/1";
 
-    private static final String BITBOX_CLI_LOCATION = "C:\\Users\\milan\\Documents\\eclipse-workspace\\"
-            + "treble-server\\dist\\bitbox\\BitBox_CLI_3.0.0_Win64.exe";
+    private static final String BITBOX_CLI_LOCATION = "C:\\Work\\Projects\\TrebleWallet\\TrebleWallet\\treble-server\\dist\\bitboxBitBox_CLI_3.0.0_Win64.exe";
 
     private static final String TEST_HASH = "f6f4a3633eda92eef9dd96858dec2f5ea4dfebb67adac879c964194eb3b97d79";
     static Random rand = new Random();
@@ -134,6 +133,36 @@ public class BitboxClientTest {
         boolean verification = eckey.verify(hash, sigDes);
         log.info("verification successful: {}", verification);
         assertTrue("can't verify signature {" + sigDes + "} with this key: {" + eckey + "}", verification);
+    }
+
+    @Test(expected = BitBoxException.class)
+    public void testNullPassword() throws BitBoxException {
+        new BitboxClient(null,null);
+    }
+
+    @Test(expected = BitBoxException.class)
+    public void testEmptyPassword() throws BitBoxException {
+        new BitboxClient("",null);
+    }
+
+    @Test(expected = BitBoxException.class)
+    public void testNullPath() throws BitBoxException {
+        new BitboxClient(HSM_PASSWORD,null);
+    }
+
+    @Test(expected = BitBoxException.class)
+    public void testEmptyPath() throws BitBoxException {
+        new BitboxClient(HSM_PASSWORD,"");
+    }
+
+    @Test(expected = BitBoxException.class)
+    public void testWrongPassword() throws BitBoxException {
+        new BitboxClient("1234","somepath");
+    }
+
+    @Test(expected = BitBoxException.class)
+    public void testWrongPath() throws BitBoxException {
+        new BitboxClient(HSM_PASSWORD,"somepath");
     }
 
     // @Test

@@ -39,8 +39,14 @@ public class BitboxClient {
 
 	static ObjectMapper objectMapper = new ObjectMapper();
 
-	public BitboxClient(String password, String bitboxCLILocation) {
+	public BitboxClient(String password, String bitboxCLILocation) throws BitBoxException{
 		super();
+		if (password == null || password.isEmpty()) {
+			throw new BitBoxException("Password cannot be null or empty.");
+		}
+		if (bitboxCLILocation == null || bitboxCLILocation.isEmpty()) {
+			throw new BitBoxException("Path to the BitBoxCLI cannot be null or empty.");
+		}
 		this.password = password;
 		this.BITBOX_CLI_LOCATION = bitboxCLILocation;
 	}
