@@ -33,9 +33,9 @@ import treblewallet.bitbox.pojo.SignDTO;
  *
  */
 public class BitboxClient {
-	private static Logger log = LoggerFactory.getLogger(BitboxClient.class);
+	private Logger log = LoggerFactory.getLogger(BitboxClient.class);
 	private String BITBOX_CLI_LOCATION;
-	private String password = "0000";
+	private String password;
 
 	static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -115,6 +115,8 @@ public class BitboxClient {
 			parameters.put("curve", curve);
 		if (meta != null)
 			parameters.put("meta", meta);
+		if (hasharray == null || hasharray.isEmpty())
+			throw new BitBoxException("hasharray is mandatory field");
 		parameters.put("hasharray", "\"" + hasharray.toString() + "\"");
 		if (pubkey != null)
 			parameters.put("pubkeyarray", "\"" + pubkey.toString() + "\"");

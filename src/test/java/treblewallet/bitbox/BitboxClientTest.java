@@ -168,6 +168,11 @@ public class BitboxClientTest {
         client.info();
     }
 
+    @Test(expected = BitBoxException.class)
+    public void testWrongData() throws BitBoxException {
+        SignDTO signDTO = client.sign("", "", null, null);
+    }
+
     // @Test
     // public void testSigning() {
     // String password = ""; // FIXME: enter password
