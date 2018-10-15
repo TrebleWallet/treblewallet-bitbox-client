@@ -96,17 +96,24 @@ public class BitboxClient {
 				throw new BitBoxException("Standard error from Bitbox CLI: " + stdErr.toString());
 			}
 		}
+		String returnValue = output.toString();
+
 		try {
-			JSONObject jsonObject = new JSONObject(output.toString());
+			JSONObject jsonObject = new JSONObject(returnValue);
 			if (jsonObject.has("error")) {
-				ErrorDTO error = (ErrorDTO) jsonObject.get("error");
+				ErrorDTO error;
+				if (jsonObject instanceof JSONObject) {
+					error = new ObjectMapper().readValue(jsonObject.get("error").toString(), ErrorDTO.class);
+				} else {
+					error = (ErrorDTO) jsonObject.get("error");
+				}
 				throw new BitBoxException(error.getMessage());
 			}
-		} catch (JSONException e) {
-			log.error("Error while parsing json: {}", e);
+		} catch (JSONException | IOException ex) {
+			log.error("Error while parsing json: {}", ex);
 		}
 
-		return output.toString();
+		return returnValue;
 	}
 
 	/**
