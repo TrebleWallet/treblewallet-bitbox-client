@@ -6,6 +6,7 @@ package treblewallet.bitbox.pojo;
 public class PubKeyDTO {
     private String xpub;
     private String echo;
+    private ErrorDTO error;
 
     public PubKeyDTO() {
     }
@@ -26,7 +27,15 @@ public class PubKeyDTO {
         this.echo = echo;
     }
 
-	@Override
+    public ErrorDTO getError() {
+        return error;
+    }
+
+    public void setError(ErrorDTO error) {
+        this.error = error;
+    }
+
+    @Override
 	public String toString() {
 		return "PubKeyDTO [xpub=" + xpub + ", echo=" + echo + "]";
 	}

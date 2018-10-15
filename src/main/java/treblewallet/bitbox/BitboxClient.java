@@ -1,22 +1,23 @@
 package treblewallet.bitbox;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import treblewallet.bitbox.pojo.ErrorDTO;
+import treblewallet.bitbox.pojo.HashKeyPathDTO;
+import treblewallet.bitbox.pojo.InfoDTO;
+import treblewallet.bitbox.pojo.PubKeyDTO;
+import treblewallet.bitbox.pojo.PubKeyPathDTO;
+import treblewallet.bitbox.pojo.SignDTO;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import treblewallet.bitbox.pojo.HashKeyPathDTO;
-import treblewallet.bitbox.pojo.InfoDTO;
-import treblewallet.bitbox.pojo.PubKeyDTO;
-import treblewallet.bitbox.pojo.PubKeyPathDTO;
-import treblewallet.bitbox.pojo.SignDTO;
 
 
 /**
@@ -95,6 +96,16 @@ public class BitboxClient {
 				throw new BitBoxException("Standard error from Bitbox CLI: " + stdErr.toString());
 			}
 		}
+		try {
+			JSONObject jsonObject = new JSONObject(output.toString());
+			if (jsonObject.has("error")) {
+				ErrorDTO error = (ErrorDTO) jsonObject.get("error");
+				throw new BitBoxException(error.getMessage());
+			}
+		} catch (JSONException e) {
+			log.error("Error while parsing json: {}", e);
+		}
+
 		return output.toString();
 	}
 
