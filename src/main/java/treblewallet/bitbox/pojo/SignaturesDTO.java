@@ -1,8 +1,12 @@
 package treblewallet.bitbox.pojo;
 
 public class SignaturesDTO {
-	String sig;
-	String recid;
+	private String sig;
+	private String recid;
+
+	public SignaturesDTO() {
+	}
+
 	public String getSig() {
 		return sig;
 	}

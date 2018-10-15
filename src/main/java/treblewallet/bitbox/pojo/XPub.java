@@ -7,6 +7,10 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class XPub {
 	private String xpub;
 	private String echo;
+
+	public XPub() {
+	}
+
 	public String getXpub() {
 		return xpub;
 	}

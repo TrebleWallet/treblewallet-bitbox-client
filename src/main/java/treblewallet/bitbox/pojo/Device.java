@@ -24,6 +24,9 @@ public class Device {
 	private String TFA;
 	private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
+	public Device() {
+	}
+
 	public String getSerial() {
 		return serial;
 	}

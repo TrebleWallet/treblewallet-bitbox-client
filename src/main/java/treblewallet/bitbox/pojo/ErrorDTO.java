@@ -1,9 +1,13 @@
 package treblewallet.bitbox.pojo;
 
 public class ErrorDTO {
-	String message;
-	int code;
-	String command;
+	private String message;
+	private int code;
+	private String command;
+
+	public ErrorDTO() {
+	}
+
 	public String getMessage() {
 		return message;
 	}

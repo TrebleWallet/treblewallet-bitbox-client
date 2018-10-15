@@ -10,6 +10,9 @@ public class InfoDTO {
 	private Device device;
 	private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
+	public InfoDTO() {
+	}
+
 	public Device getDevice() {
 		return device;
 	}

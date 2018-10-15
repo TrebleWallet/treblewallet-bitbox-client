@@ -15,6 +15,9 @@ public class HashKeyPathDTO {
 	private String hash;
 	private String keypath;
 
+	public HashKeyPathDTO() {
+	}
+
 	public HashKeyPathDTO(String hash, String keypath) {
 		super();
 		this.hash = hash;

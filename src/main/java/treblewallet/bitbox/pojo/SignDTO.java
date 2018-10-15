@@ -6,7 +6,6 @@ import java.util.Arrays;
  * Created by Robert Juhas on 7/24/2018
  */
 public class SignDTO {
-
 	private String meta;
 	private HashKeyPathDTO[] data;
 	private PubKeyPathDTO[] checkpub;
