@@ -170,7 +170,7 @@ public class BitboxClientTest {
 
     @Test(expected = BitBoxException.class)
     public void testWrongData() throws BitBoxException {
-        SignDTO signDTO = client.sign("", "", null, null);
+        client.sign("", "", null, null);
     }
 
     // @Test
