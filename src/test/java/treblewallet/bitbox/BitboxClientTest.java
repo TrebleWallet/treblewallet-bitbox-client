@@ -234,6 +234,58 @@ public class BitboxClientTest {
         System.out.println("RAW TRANSACTION AFTER 2ND SIGNATURE: " + Utils.HEX.encode(transaction.bitcoinSerialize()));
     }
 
+    @Test
+    public void testSimpleTransaction() throws Exception {
+        NetworkParameters params = TestNet3Params.get();
+        String rawTransaction = "02000000036d82477f27c1d77379402e3a2105d95a5525f9fd6fba672d569e61ecaa6d08530000000017160014637cafb563eb0ec188d2866f0bf6903da307b158fdffffff9f9067eb312e046a83aedd3a119737e2e6fc5b17b7346de15c071a2510d6c5fd000000001716001422cfa8b6c611c0439a9c1d81281dfdbaa6cdff98fdffffffcf65dfd90f1a1d76c499b442534ebf0e8bf5369bc4e8e2a78c0306116723228b000000008a4730440220492f6b3e097d20a7e8b1bc7961180c0167b281fe5657373d19f5aff2cf48bce602202de23c41b6e70b90ad905aa7a8e1a2fd76db55b9c4345db1e6cbc9bc03cfa0cb014104a48bed6d0c1ff608cfbc4f27d7831061a58c927055d0d74b3ad7351e3523d697785d50acb87c57a472bb9af8dc35cdc10302661fd301e9a58ec414105037a40ffdffffff0210270000000000001976a9141e571fcfd069eb8cdcb0c5ae3ffeb313db05053a88ac04460f000000000017a914e925cfd668c86d2b91df4600f48389b3d72fd296876cf81500";
+        PubKeyDTO pubKeyDTO = client.xpub(KEY_PATH);
+        ExtendedKey key1 = ExtendedKey.parse(pubKeyDTO.getXpub(), true);
+        com.bushidowallet.core.bitcoin.Address address = key1.getAddress();
+        Address address1 = new Address(params, address.getHash());
+        System.out.println(address1.toString());
+        Transaction previousTransaction = new Transaction(params, Utils.HEX.decode(rawTransaction));
+        TransactionOutPoint outPoint = new TransactionOutPoint(params, 0, previousTransaction);
+        TransactionInput inputTransaction = new TransactionInput(params, previousTransaction, outPoint.getConnectedPubKeyScript(), outPoint);
+
+        Transaction transaction = new Transaction(params);
+        transaction.addInput(inputTransaction);
+        transaction.addOutput(Coin.valueOf(8000), Address.fromBase58(params, "mofhdVSgsUsVacWsf8QMNhDQqYnVXPtnZH"));
+
+        org.bitcoinj.core.ECKey key = DeterministicKey.fromPublicOnly(key1.getPublic());
+
+        Script scriptPubKey = inputTransaction.getConnectedOutput().getScriptPubKey();
+        inputTransaction.setScriptSig(scriptPubKey.createEmptyInputScript(key, new Script(outPoint.getConnectedOutput().getScriptBytes())));
+        Script inputScript = transaction.getInput(0).getScriptSig();
+        byte[] script = outPoint.getConnectedOutput().getScriptBytes();
+
+        // Calculate signature for the transaction input
+        //TransactionSignature signature = transaction.calculateSignature(0, key, script, Transaction.SigHash.ALL, false);
+        Sha256Hash sighash = transaction.hashForSignature(0, script, Transaction.SigHash.ALL, false);
+
+        List<HashKeyPathDTO> hashArray = new ArrayList<HashKeyPathDTO>();
+        hashArray.add(new HashKeyPathDTO(sighash.toString(), KEY_PATH));
+        List pubKeyArray = new ArrayList();
+        SignDTO signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
+        signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
+        String rString = signDTO.getSign()[0].getSig().substring(0,64);
+        String sString = signDTO.getSign()[0].getSig().substring(64,128);
+        BigInteger r = new BigInteger(Utils.HEX.decode(rString));
+        BigInteger s = new BigInteger(Utils.HEX.decode(sString));
+        org.bitcoinj.core.ECKey.ECDSASignature signature2 = new org.bitcoinj.core.ECKey.ECDSASignature(r,s);
+        // Add the second signature to the signature list
+        TransactionSignature signature = new TransactionSignature(signature2, Transaction.SigHash.ALL, false);
+
+
+        int sigIndex = 0;
+        // inputScript must have OP_0 in place of the actual signature as it will get
+        // replaced on this point
+        // That's why we call setScriptSig() with createEmptyInputScript() earlier on
+        inputScript = scriptPubKey.getScriptSigWithSignature(inputScript, signature.encodeToBitcoin(), sigIndex);
+        transaction.getInput(0).setScriptSig(inputScript);
+
+        System.out.println("SIMPLE TRANSACTION: " + Utils.HEX.encode(transaction.bitcoinSerialize()));
+    }
+
     @Test(expected = BitBoxException.class)
     public void testNullPassword() throws BitBoxException {
         new BitboxClient(null,null);
