@@ -5,12 +5,29 @@ import com.bushidowallet.core.bitcoin.bip32.ExtendedKey;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import org.bitcoinj.core.Address;
+import org.bitcoinj.core.Coin;
+import org.bitcoinj.core.DumpedPrivateKey;
+import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionInput;
+import org.bitcoinj.core.TransactionOutPoint;
+import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.core.Utils;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.crypto.TransactionSignature;
+import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.TestNet3Params;
+import org.bitcoinj.script.Script;
+import org.bitcoinj.script.ScriptBuilder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spongycastle.math.ec.ECPoint;
 import treblewallet.bitbox.pojo.HashKeyPathDTO;
 import treblewallet.bitbox.pojo.InfoDTO;
 import treblewallet.bitbox.pojo.PubKeyDTO;
@@ -18,6 +35,8 @@ import treblewallet.bitbox.pojo.PubKeyPathDTO;
 import treblewallet.bitbox.pojo.SignDTO;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -59,6 +78,23 @@ public class BitboxClientTest {
         String keyPath = KEY_PATH + "/" + rand.nextInt(1000000);
         PubKeyDTO xpub = client.xpub(keyPath);
         log.info("xpub {}: {}", KEY_PATH, xpub);
+    }
+
+    @Test
+    public void testGetPublicKeyTestNet() throws Exception{
+        String keyPath = "m/44h/1h/0/0/0";
+        PubKeyDTO publicKey = client.xpub(keyPath);
+        ExtendedKey key = ExtendedKey.parse(publicKey.getXpub(), true);
+        System.out.println(Utils.HEX.encode(key.getPublic()));
+        System.out.println(key.getPublicHex());
+        System.out.println(key.serializePublic());
+    }
+
+    @Test
+    public void testGetPublicKeyMainNet() {
+        String keyPath = "m/44h/0h/0/0/0";
+        PubKeyDTO publicKey = client.xpub(keyPath);
+        DeterministicKey key = DeterministicKey.deserializeB58(publicKey.getXpub(), MainNetParams.get());
     }
 
     /**
@@ -134,6 +170,68 @@ public class BitboxClientTest {
         boolean verification = eckey.verify(hash, sigDes);
         log.info("verification successful: {}", verification);
         assertTrue("can't verify signature {" + sigDes + "} with this key: {" + eckey + "}", verification);
+    }
+
+    @Test
+    public void testCreatingMultisigAddress() throws Exception {
+        NetworkParameters params = TestNet3Params.get();
+        String rawTransaction = "0200000001d59d012e2cfd8ff9dab438cb04378286da988f4c4e86d49dfc6024a891feb7890000000017160014757d1f8fc2d020e9ccc25d05f89b0abf874db8d2fdffffff02a3e5ba000000000017a914a0ac976efef4851be20aa4b266dae4fe83210fd087a08601000000000017a914af523647d560101aa103a888d53c3324e1726f2b8755f81500";
+        org.bitcoinj.core.ECKey publicKey1 = org.bitcoinj.core.ECKey.fromPublicOnly(Utils.HEX.decode("04A48BED6D0C1FF608CFBC4F27D7831061A58C927055D0D74B3AD7351E3523D697785D50ACB87C57A472BB9AF8DC35CDC10302661FD301E9A58EC414105037A40F".toLowerCase())); //testnet key
+        PubKeyDTO pubKeyDTO = client.xpub(KEY_PATH);
+        ExtendedKey extendedKey = ExtendedKey.parse(pubKeyDTO.getXpub(), false);
+        org.bitcoinj.core.ECKey publicKey2 = org.bitcoinj.core.ECKey.fromPublicOnly(extendedKey.getPublic()); //testnet key
+        org.bitcoinj.core.ECKey publicKey3 = org.bitcoinj.core.ECKey.fromPublicOnly(Utils.HEX.decode("040D4B71CB6C94D6D0DECD497ADAE4ADA068F26C47A4CBAC51A3CB742F4EC713510924C789AB11D7F986CCF77AC6DB3B25B0216D607ADD7EC083D4B3B7EE098191".toLowerCase())); //testnet key
+        List<org.bitcoinj.core.ECKey> keys = ImmutableList.of(publicKey1, publicKey3, publicKey2);
+        Script redeemScript = ScriptBuilder.createMultiSigOutputScript(2, keys);
+        Script scriptPubKey = ScriptBuilder.createP2SHOutputScript(redeemScript);
+        Address address = Address.fromP2SHScript(params, scriptPubKey);
+        String redeemScriptString = Utils.HEX.encode(redeemScript.getProgram());
+        String addressString = address.toBase58();
+        System.out.println(addressString);
+        Transaction previousTransaction = new Transaction(params, Utils.HEX.decode(rawTransaction));
+        TransactionOutPoint outPoint = new TransactionOutPoint(params, 1, previousTransaction);
+        TransactionInput inputTransaction = new TransactionInput(params, previousTransaction, outPoint.getConnectedPubKeyScript(), outPoint);
+
+        Transaction transaction = new Transaction(params);
+        transaction.addInput(inputTransaction);
+        transaction.addOutput(Coin.valueOf(8000), Address.fromBase58(params, "mofhdVSgsUsVacWsf8QMNhDQqYnVXPtnZH"));
+
+        System.out.println("RAW TRANSACTION AFTER INPUTS AND OUTPUTS: " + Utils.HEX.encode(transaction.bitcoinSerialize()));
+
+        inputTransaction.getOutpoint().getHash().toString();
+        Sha256Hash sighash = transaction.hashForSignature(0, redeemScript, Transaction.SigHash.ALL, false);
+
+        org.bitcoinj.core.ECKey key1 = DumpedPrivateKey.fromBase58(params, "92CqrxbHxU1nDQo2N9UkL6bGftcfbh929cYzPSubPshyERqhUK7").getKey();
+        org.bitcoinj.core.ECKey.ECDSASignature firstSignature = key1.sign(sighash);
+
+        // Add the first signature to the signature list
+        TransactionSignature signature = new TransactionSignature(firstSignature, Transaction.SigHash.ALL, false);
+        List<TransactionSignature> signatures = new ArrayList<>();
+        signatures.add(signature);
+        // Rebuild p2sh multisig input script = unlocking script
+        Script inputScript = ScriptBuilder.createP2SHMultiSigInputScript(signatures, redeemScript);
+        transaction.getInput(0).setScriptSig(inputScript);
+        System.out.println("RAW TRANSACTION AFTER 1ST SIGNATURE: " + Utils.HEX.encode(transaction.bitcoinSerialize()));
+
+        Sha256Hash sighash2 = transaction.hashForSignature(0, redeemScript, Transaction.SigHash.ALL, false);
+
+        List<HashKeyPathDTO> hashArray = new ArrayList<HashKeyPathDTO>();
+        hashArray.add(new HashKeyPathDTO(sighash2.toString(), KEY_PATH));
+        List pubKeyArray = new ArrayList();
+        SignDTO signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
+        signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
+        String rString = signDTO.getSign()[0].getSig().substring(0,64);
+        String sString = signDTO.getSign()[0].getSig().substring(64,128);
+        BigInteger r = new BigInteger(Utils.HEX.decode(rString));
+        BigInteger s = new BigInteger(Utils.HEX.decode(sString));
+        org.bitcoinj.core.ECKey.ECDSASignature signature2 = new org.bitcoinj.core.ECKey.ECDSASignature(r,s);
+        // Add the second signature to the signature list
+        signature = new TransactionSignature(signature2, Transaction.SigHash.ALL, false);
+        signatures.add(signature);
+        inputScript = ScriptBuilder.createP2SHMultiSigInputScript(signatures, redeemScript);
+        transaction.getInput(0).setScriptSig(inputScript);
+
+        System.out.println("RAW TRANSACTION AFTER 2ND SIGNATURE: " + Utils.HEX.encode(transaction.bitcoinSerialize()));
     }
 
     @Test(expected = BitBoxException.class)
