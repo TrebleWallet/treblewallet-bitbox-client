@@ -235,6 +235,54 @@ public class BitboxClientTest {
     }
 
     @Test
+    public void testCreatingMultisigAddress1OutOf3() throws Exception {
+        NetworkParameters params = TestNet3Params.get();
+        String rawTransaction = "020000000265c87df0f9cd4f8d18afcf94a22c55e6d62755cf4a95be3a7c949d445bf59e470100000017160014844476fa4219a141eefd5569a34597283f09904dfdffffff9af6f247d8c8629bd5d739e60150976310b0451e4b0ddeb7208b5b072c54e147000000008b48304502210095c5e8080ec47aba93be2101a4c1069a992f32fa5b2f0052ee816d5db64907ba02206b04cbed3a71e9ffea9d83f7cece7262ad08b327552f734c046c9b822887cf00014104a48bed6d0c1ff608cfbc4f27d7831061a58c927055d0d74b3ad7351e3523d697785d50acb87c57a472bb9af8dc35cdc10302661fd301e9a58ec414105037a40ffdffffff02102700000000000017a914b95f89f9c23b9d0a6665123d971f9f35fe87ac048701470f000000000017a9146862da5afecd9e09e9c1f21a774592799e32a29087b2f81500";
+        org.bitcoinj.core.ECKey publicKey1 = org.bitcoinj.core.ECKey.fromPublicOnly(Utils.HEX.decode("04A48BED6D0C1FF608CFBC4F27D7831061A58C927055D0D74B3AD7351E3523D697785D50ACB87C57A472BB9AF8DC35CDC10302661FD301E9A58EC414105037A40F".toLowerCase())); //testnet key
+        String KEY_PATH = "m/44p/1/0/0/3";
+        PubKeyDTO pubKeyDTO = client.xpub(KEY_PATH);
+        ExtendedKey extendedKey = ExtendedKey.parse(pubKeyDTO.getXpub(), false);
+        org.bitcoinj.core.ECKey publicKey2 = org.bitcoinj.core.ECKey.fromPublicOnly(extendedKey.getPublic()); //testnet key
+        org.bitcoinj.core.ECKey publicKey3 = org.bitcoinj.core.ECKey.fromPublicOnly(Utils.HEX.decode("040D4B71CB6C94D6D0DECD497ADAE4ADA068F26C47A4CBAC51A3CB742F4EC713510924C789AB11D7F986CCF77AC6DB3B25B0216D607ADD7EC083D4B3B7EE098191".toLowerCase())); //testnet key
+        List<org.bitcoinj.core.ECKey> keys = ImmutableList.of(publicKey1, publicKey3, publicKey2);
+        Script redeemScript = ScriptBuilder.createMultiSigOutputScript(1, keys);
+        Script scriptPubKey = ScriptBuilder.createP2SHOutputScript(redeemScript);
+        Address address = Address.fromP2SHScript(params, scriptPubKey);
+        String redeemScriptString = Utils.HEX.encode(redeemScript.getProgram());
+        String addressString = address.toBase58();
+        System.out.println(addressString);
+        Transaction previousTransaction = new Transaction(params, Utils.HEX.decode(rawTransaction));
+        TransactionOutPoint outPoint = new TransactionOutPoint(params, 0, previousTransaction);
+        TransactionInput inputTransaction = new TransactionInput(params, previousTransaction, outPoint.getConnectedPubKeyScript(), outPoint);
+
+        Transaction transaction = new Transaction(params);
+        transaction.addInput(inputTransaction);
+        transaction.addOutput(Coin.valueOf(8000), Address.fromBase58(params, "mofhdVSgsUsVacWsf8QMNhDQqYnVXPtnZH"));
+
+        System.out.println("RAW TRANSACTION AFTER INPUTS AND OUTPUTS: " + Utils.HEX.encode(transaction.bitcoinSerialize()));
+        Sha256Hash sighash2 = transaction.hashForSignature(0, redeemScript, Transaction.SigHash.ALL, false);
+
+        List<HashKeyPathDTO> hashArray = new ArrayList<HashKeyPathDTO>();
+        hashArray.add(new HashKeyPathDTO(sighash2.toString(), KEY_PATH));
+        List pubKeyArray = new ArrayList();
+        SignDTO signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
+        signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
+        String rString = signDTO.getSign()[0].getSig().substring(0,64);
+        String sString = signDTO.getSign()[0].getSig().substring(64,128);
+        BigInteger r = new BigInteger(Utils.HEX.decode(rString));
+        BigInteger s = new BigInteger(Utils.HEX.decode(sString));
+        org.bitcoinj.core.ECKey.ECDSASignature signature2 = new org.bitcoinj.core.ECKey.ECDSASignature(r,s);
+        // Add the second signature to the signature list
+        TransactionSignature signature = new TransactionSignature(signature2, Transaction.SigHash.ALL, false);
+        List signatures = new ArrayList();
+        signatures.add(signature);
+        Script inputScript = ScriptBuilder.createP2SHMultiSigInputScript(signatures, redeemScript);
+        transaction.getInput(0).setScriptSig(inputScript);
+
+        System.out.println("RAW TRANSACTION AFTER 2ND SIGNATURE: " + Utils.HEX.encode(transaction.bitcoinSerialize()));
+    }
+
+    @Test
     public void testSimpleTransaction() throws Exception {
         NetworkParameters params = TestNet3Params.get();
         String rawTransaction = "02000000036d82477f27c1d77379402e3a2105d95a5525f9fd6fba672d569e61ecaa6d08530000000017160014637cafb563eb0ec188d2866f0bf6903da307b158fdffffff9f9067eb312e046a83aedd3a119737e2e6fc5b17b7346de15c071a2510d6c5fd000000001716001422cfa8b6c611c0439a9c1d81281dfdbaa6cdff98fdffffffcf65dfd90f1a1d76c499b442534ebf0e8bf5369bc4e8e2a78c0306116723228b000000008a4730440220492f6b3e097d20a7e8b1bc7961180c0167b281fe5657373d19f5aff2cf48bce602202de23c41b6e70b90ad905aa7a8e1a2fd76db55b9c4345db1e6cbc9bc03cfa0cb014104a48bed6d0c1ff608cfbc4f27d7831061a58c927055d0d74b3ad7351e3523d697785d50acb87c57a472bb9af8dc35cdc10302661fd301e9a58ec414105037a40ffdffffff0210270000000000001976a9141e571fcfd069eb8cdcb0c5ae3ffeb313db05053a88ac04460f000000000017a914e925cfd668c86d2b91df4600f48389b3d72fd296876cf81500";
