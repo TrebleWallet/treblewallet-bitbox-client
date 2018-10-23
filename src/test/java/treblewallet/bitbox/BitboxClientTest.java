@@ -210,7 +210,7 @@ public class BitboxClientTest {
         signatures.add(signature);
         // Rebuild p2sh multisig input script = unlocking script
         Script inputScript = ScriptBuilder.createP2SHMultiSigInputScript(signatures, redeemScript);
-        transaction.getInput(0).setScriptSig(inputScript);
+        //transaction.getInput(0).setScriptSig(inputScript);
         System.out.println("RAW TRANSACTION AFTER 1ST SIGNATURE: " + Utils.HEX.encode(transaction.bitcoinSerialize()));
 
         Sha256Hash sighash2 = transaction.hashForSignature(0, redeemScript, Transaction.SigHash.ALL, false);
@@ -332,6 +332,14 @@ public class BitboxClientTest {
         transaction.getInput(0).setScriptSig(inputScript);
 
         System.out.println("SIMPLE TRANSACTION: " + Utils.HEX.encode(transaction.bitcoinSerialize()));
+    }
+
+    @Test
+    public void testKeyTransformation() throws Exception{
+        ExtendedKey extendedKey = ExtendedKey.parse("xpub6FbmzeEAFp4LXUMTNMzRmxe3UPoFMzVmpqbMfvrDHoPdAqbv5iyDrArpzpkFoPkMuBx7ehahBRjnMbw8sVjfU6CmdLXwz5bPpXZocypqkxY", false);
+        String processedKey = "048b04c4386ba823401b0439701ac64134da9e05481a13c84ce5737859194009306123183eb3daab580298c99c79a892a7deeb1ddb0ed1fa632c3dc61de000657b";
+        org.bitcoinj.core.ECKey publicKey2 = org.bitcoinj.core.ECKey.fromPublicOnly(extendedKey.getPublic());
+        assertTrue(publicKey2.decompress().getPublicKeyAsHex().equals(processedKey));
     }
 
     @Test(expected = BitBoxException.class)

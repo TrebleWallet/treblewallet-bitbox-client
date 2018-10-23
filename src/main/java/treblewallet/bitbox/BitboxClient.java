@@ -126,8 +126,7 @@ public class BitboxClient {
 	 * @return
 	 * @throws BitBoxException
 	 */
-	public SignDTO sign(String curve, String meta, List<HashKeyPathDTO> hasharray, List<PubKeyPathDTO> pubkey)
-			throws BitBoxException {
+    public SignDTO sign(String curve, String meta, List<HashKeyPathDTO> hasharray, List<PubKeyPathDTO> pubkey) throws BitBoxException {
 		Map<String, String> parameters = new HashMap<>();
 		if (curve != null)
 			parameters.put("curve", curve);
@@ -148,6 +147,11 @@ public class BitboxClient {
 		}
 		return result;
 	}
+
+    public SignDTO signForReal(String curve, String meta, List<HashKeyPathDTO> hasharray, List<PubKeyPathDTO> pubkey) throws BitBoxException {
+        sign(curve, meta, hasharray, pubkey);
+        return sign(curve, meta, hasharray, pubkey);
+    }
 
 	/**
 	 * Get the public key for a {@code keyPath}.
