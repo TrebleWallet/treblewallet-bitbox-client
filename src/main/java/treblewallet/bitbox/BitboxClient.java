@@ -67,7 +67,7 @@ public class BitboxClient {
 			}
 
 			// Run the cmd string as a Windows command
-			log.debug("running {}", cmd);
+			log.info("running {}", cmd);
 			Process process = Runtime.getRuntime().exec(cmd.toString());
 
 			// Get input streams
@@ -83,7 +83,7 @@ public class BitboxClient {
 				output.append(s);
 				System.out.println(s);
 			}
-			log.debug("Result for {}: {}", command, output.toString());
+			log.info("Result for {}: {}", command, output.toString());
 
 			// Read command errors
 			while ((s = stdError.readLine()) != null) {
