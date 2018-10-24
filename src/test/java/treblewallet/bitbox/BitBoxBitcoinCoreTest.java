@@ -134,6 +134,9 @@ public class BitBoxBitcoinCoreTest {
         inputScript = ScriptBuilder.createP2SHMultiSigInputScript(signatures, redeemScript);
         transaction.getInput(0).setScriptSig(inputScript);
 
-        bitcoinCoreClient.sendrawtransaction(Utils.HEX.encode(transaction.bitcoinSerialize()));
+        String rawTransactionHEX = Utils.HEX.encode(transaction.bitcoinSerialize());
+        log.info("RAW TRANSACTION: {}", rawTransactionHEX);
+
+        bitcoinCoreClient.sendrawtransaction(rawTransactionHEX);
     }
 }
