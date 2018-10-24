@@ -82,6 +82,7 @@ public class BitBoxBitcoinCoreTest {
             }
         }
         unspents.sort((x,y) -> x.getTxid().compareTo(y.getTxid()));
+        unspents.forEach(x -> System.out.println(x.getTxid()));
     }
 
     @Test
