@@ -81,6 +81,7 @@ public class BitBoxBitcoinCoreTest {
                 bitcoinCoreClient.sendtoaddress(addressString, new BigDecimal("0.0001").setScale(8, RoundingMode.DOWN));
             }
         }
+        unspents.sort((x,y) -> x.getTxid().compareTo(y.getTxid()));
     }
 
     @Test
