@@ -90,7 +90,9 @@ public class BitBoxBitcoinCoreTest {
         Assume.assumeTrue(!unspents.isEmpty());
         ListUnspentTO unspentTO = unspents.get(0);
         String inputTransactionBitcoinCoreHEX = bitcoinCoreClient.getrawtransaction(unspentTO.getTxid());
-        RawTransaction inputTransactionBitcoinCoreVERBOSE = bitcoinCoreClient.getrawtransaction(unspentTO.getTxid(), true);
+
+        System.out.println("UTXO ID:" + unspentTO.getTxid() + " INDEX: " + unspentTO.getVout());
+
         Transaction previousTransaction = new Transaction(params, Utils.HEX.decode(inputTransactionBitcoinCoreHEX));
         TransactionOutPoint outPoint = new TransactionOutPoint(params, unspentTO.getVout(), previousTransaction);
         TransactionInput inputTransaction = new TransactionInput(params, previousTransaction, outPoint.getConnectedPubKeyScript(), outPoint);
@@ -111,10 +113,6 @@ public class BitBoxBitcoinCoreTest {
         TransactionSignature signature = new TransactionSignature(firstSignature, Transaction.SigHash.ALL, false);
         List<TransactionSignature> signatures = new ArrayList<>();
         signatures.add(signature);
-        // Rebuild p2sh multisig input script = unlocking script
-        Script inputScript = ScriptBuilder.createP2SHMultiSigInputScript(signatures, redeemScript);
-        transaction.getInput(0).setScriptSig(inputScript);
-        System.out.println("RAW TRANSACTION AFTER 1ST SIGNATURE: " + Utils.HEX.encode(transaction.bitcoinSerialize()));
 
         Sha256Hash sighash2 = transaction.hashForSignature(0, redeemScript, Transaction.SigHash.ALL, false);
 
@@ -131,7 +129,7 @@ public class BitBoxBitcoinCoreTest {
         // Add the second signature to the signature list
         signature = new TransactionSignature(signature2, Transaction.SigHash.ALL, false);
         signatures.add(signature);
-        inputScript = ScriptBuilder.createP2SHMultiSigInputScript(signatures, redeemScript);
+        Script inputScript = ScriptBuilder.createP2SHMultiSigInputScript(signatures, redeemScript);
         transaction.getInput(0).setScriptSig(inputScript);
 
         String rawTransactionHEX = Utils.HEX.encode(transaction.bitcoinSerialize());
