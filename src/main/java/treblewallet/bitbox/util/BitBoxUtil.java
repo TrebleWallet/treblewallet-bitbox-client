@@ -1,5 +1,7 @@
 package treblewallet.bitbox.util;
 
+import java.math.BigInteger;
+
 public class BitBoxUtil {
 	/**
 	 * Rendering of the CLI parameters is different:
@@ -26,5 +28,18 @@ public class BitBoxUtil {
 	 */
 	public static String createKeyValuePairCLI(String key, String value) {
 		return createKeyValuePairCLI(key, value, quote);
+	}
+
+	static public BigInteger convertToBigInteger(String hex) {
+		BigInteger n = new BigInteger(hex,16);
+		return n;
+	}
+
+	static public BigInteger getRFromSig(String sig) {
+		return convertToBigInteger(sig.substring(0, 64));
+	}
+
+	static public BigInteger getSFromSig(String sig) {
+		return convertToBigInteger(sig.substring(64, 128));
 	}
 }

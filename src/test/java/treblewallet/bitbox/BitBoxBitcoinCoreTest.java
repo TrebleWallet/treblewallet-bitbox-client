@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import treblewallet.bitbox.pojo.HashKeyPathDTO;
 import treblewallet.bitbox.pojo.PubKeyDTO;
 import treblewallet.bitbox.pojo.SignDTO;
+import treblewallet.bitbox.util.BitBoxUtil;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -134,10 +135,8 @@ public class BitBoxBitcoinCoreTest {
         List pubKeyArray = new ArrayList();
         SignDTO signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
         signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
-        String rString = signDTO.getSign()[0].getSig().substring(0, 64);
-        String sString = signDTO.getSign()[0].getSig().substring(64, 128);
-        BigInteger r = new BigInteger(rString, 16);
-        BigInteger s = new BigInteger(sString, 16);
+        BigInteger r = BitBoxUtil.getRFromSig(signDTO.getSign()[0].getSig());
+        BigInteger s = BitBoxUtil.getSFromSig(signDTO.getSign()[0].getSig());
         org.bitcoinj.core.ECKey.ECDSASignature signature2 = new org.bitcoinj.core.ECKey.ECDSASignature(r, s);
         // Add the second signature to the signature list
         signature = new TransactionSignature(signature2, Transaction.SigHash.ALL, false);
