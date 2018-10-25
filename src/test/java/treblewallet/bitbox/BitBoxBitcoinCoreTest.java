@@ -6,6 +6,7 @@ import bcJsonRpc.pojo.ListUnspentTO;
 import bcJsonRpc.pojo.RawTransaction;
 import com.bushidowallet.core.bitcoin.bip32.ExtendedKey;
 import com.google.common.collect.ImmutableList;
+import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.DumpedPrivateKey;
@@ -85,8 +86,20 @@ public class BitBoxBitcoinCoreTest {
         unspents.forEach(x -> System.out.println(x.getTxid()));
     }
 
+//    @Test
+//    public void spendingTransactions() {
+//        for (int i = 0; i < 10; i++) {
+//            try {
+//                createMultisigTransactionHSM();
+//            } catch (Exception ex) {
+//                ex.printStackTrace();
+//            }
+//
+//        }
+//    }
+
     @Test
-    public void createMultisigTransactionHSM() throws Exception {
+    public void createMultisigTransactionHSM() {
         Assume.assumeNotNull(addressString);
         Assume.assumeTrue(!addressString.isEmpty());
         Assume.assumeTrue(!unspents.isEmpty());
@@ -103,11 +116,9 @@ public class BitBoxBitcoinCoreTest {
         transaction.addInput(inputTransaction);
         transaction.addOutput(Coin.valueOf(8000), Address.fromBase58(params, "mofhdVSgsUsVacWsf8QMNhDQqYnVXPtnZH"));
 
-        System.out.println("RAW TRANSACTION AFTER INPUTS AND OUTPUTS: " + Utils.HEX.encode(transaction.bitcoinSerialize()));
-
         inputTransaction.getOutpoint().getHash().toString();
         Sha256Hash sighash = transaction.hashForSignature(0, redeemScript, Transaction.SigHash.ALL, false);
-
+        log.info("SIGNATURE HASH: {}", sighash);
         org.bitcoinj.core.ECKey key1 = DumpedPrivateKey.fromBase58(params, "92CqrxbHxU1nDQo2N9UkL6bGftcfbh929cYzPSubPshyERqhUK7").getKey();
         org.bitcoinj.core.ECKey.ECDSASignature firstSignature = key1.sign(sighash);
 
@@ -116,10 +127,8 @@ public class BitBoxBitcoinCoreTest {
         List<TransactionSignature> signatures = new ArrayList<>();
         signatures.add(signature);
 
-        Sha256Hash sighash2 = transaction.hashForSignature(0, redeemScript, Transaction.SigHash.ALL, false);
-
         List<HashKeyPathDTO> hashArray = new ArrayList<HashKeyPathDTO>();
-        hashArray.add(new HashKeyPathDTO(sighash2.toString(), KEY_PATH));
+        hashArray.add(new HashKeyPathDTO(sighash.toString(), KEY_PATH));
         List pubKeyArray = new ArrayList();
         SignDTO signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
         signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
@@ -136,7 +145,9 @@ public class BitBoxBitcoinCoreTest {
 
         String rawTransactionHEX = Utils.HEX.encode(transaction.bitcoinSerialize());
         log.info("RAW TRANSACTION: {}", rawTransactionHEX);
-
-        bitcoinCoreClient.sendrawtransaction(rawTransactionHEX);
+        RawTransaction rawTransaction = bitcoinCoreClient.decoderawtransaction(rawTransactionHEX);
+        long matches = StringUtils.countMatches(rawTransaction.getVin().get(0).getScriptSig().getAsm(), "[ALL]");
+        System.out.println("NUMBER OF ALL SIGNATURES: " + matches);
+        //bitcoinCoreClient.sendrawtransaction(rawTransactionHEX);
     }
 }
