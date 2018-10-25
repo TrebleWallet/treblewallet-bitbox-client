@@ -66,6 +66,8 @@ public class BitBoxBitcoinCoreTest {
         PubKeyDTO pubKeyDTO = client.xpub(KEY_PATH);
         ExtendedKey extendedKey = ExtendedKey.parse(pubKeyDTO.getXpub(), false);
         org.bitcoinj.core.ECKey publicKey2 = org.bitcoinj.core.ECKey.fromPublicOnly(extendedKey.getPublic());
+        System.out.println("PUBLIC KEY 2: " + publicKey2.getPublicKeyAsHex());
+        System.out.println("PUBLIC EXTENDED KEY 2: " + publicKey2.decompress().getPublicKeyAsHex());
         org.bitcoinj.core.ECKey publicKey3 = org.bitcoinj.core.ECKey.fromPublicOnly(Utils.HEX.decode(config.clientPublicKey3.toLowerCase()));
         List<ECKey> keys = ImmutableList.of(publicKey1, publicKey3, publicKey2);
         redeemScript = ScriptBuilder.createMultiSigOutputScript(2, keys);
@@ -86,24 +88,24 @@ public class BitBoxBitcoinCoreTest {
         unspents.forEach(x -> System.out.println(x.getTxid()));
     }
 
-//    @Test
-//    public void spendingTransactions() {
-//        for (int i = 0; i < 10; i++) {
-//            try {
-//                createMultisigTransactionHSM();
-//            } catch (Exception ex) {
-//                ex.printStackTrace();
-//            }
-//
-//        }
-//    }
-
     @Test
-    public void createMultisigTransactionHSM() {
+    public void spendingTransactions() {
+        for (int i = 0; i < 10; i++) {
+            try {
+                createMultisigTransactionHSM(i);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+        }
+    }
+
+    //@Test
+    public void createMultisigTransactionHSM(int i) {
         Assume.assumeNotNull(addressString);
         Assume.assumeTrue(!addressString.isEmpty());
         Assume.assumeTrue(!unspents.isEmpty());
-        ListUnspentTO unspentTO = unspents.get(0);
+        ListUnspentTO unspentTO = unspents.get(i);
         String inputTransactionBitcoinCoreHEX = bitcoinCoreClient.getrawtransaction(unspentTO.getTxid());
 
         System.out.println("UTXO ID:" + unspentTO.getTxid() + " INDEX: " + unspentTO.getVout());
@@ -134,13 +136,14 @@ public class BitBoxBitcoinCoreTest {
         signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
         String rString = signDTO.getSign()[0].getSig().substring(0, 64);
         String sString = signDTO.getSign()[0].getSig().substring(64, 128);
-        BigInteger r = new BigInteger(Utils.HEX.decode(rString));
-        BigInteger s = new BigInteger(Utils.HEX.decode(sString));
+        BigInteger r = new BigInteger(rString, 16);
+        BigInteger s = new BigInteger(sString, 16);
         org.bitcoinj.core.ECKey.ECDSASignature signature2 = new org.bitcoinj.core.ECKey.ECDSASignature(r, s);
         // Add the second signature to the signature list
         signature = new TransactionSignature(signature2, Transaction.SigHash.ALL, false);
         signatures.add(signature);
         Script inputScript = ScriptBuilder.createP2SHMultiSigInputScript(signatures, redeemScript);
+        System.out.println("INPUT SCRIPT: " + Utils.HEX.encode(inputScript.getProgram()));
         transaction.getInput(0).setScriptSig(inputScript);
 
         String rawTransactionHEX = Utils.HEX.encode(transaction.bitcoinSerialize());
@@ -148,6 +151,6 @@ public class BitBoxBitcoinCoreTest {
         RawTransaction rawTransaction = bitcoinCoreClient.decoderawtransaction(rawTransactionHEX);
         long matches = StringUtils.countMatches(rawTransaction.getVin().get(0).getScriptSig().getAsm(), "[ALL]");
         System.out.println("NUMBER OF ALL SIGNATURES: " + matches);
-        //bitcoinCoreClient.sendrawtransaction(rawTransactionHEX);
+        bitcoinCoreClient.sendrawtransaction(rawTransactionHEX);
     }
 }
