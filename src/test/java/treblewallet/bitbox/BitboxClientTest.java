@@ -1,11 +1,16 @@
 package treblewallet.bitbox;
 
-import com.bushidowallet.core.bitcoin.bip32.ECKey;
-import com.bushidowallet.core.bitcoin.bip32.ExtendedKey;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.DumpedPrivateKey;
@@ -14,7 +19,6 @@ import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutPoint;
-import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.TransactionSignature;
@@ -27,24 +31,20 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongycastle.math.ec.ECPoint;
+
+import com.bushidowallet.core.bitcoin.bip32.ECKey;
+import com.bushidowallet.core.bitcoin.bip32.ExtendedKey;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+
 import treblewallet.bitbox.pojo.HashKeyPathDTO;
 import treblewallet.bitbox.pojo.InfoDTO;
 import treblewallet.bitbox.pojo.PubKeyDTO;
 import treblewallet.bitbox.pojo.PubKeyPathDTO;
 import treblewallet.bitbox.pojo.SignDTO;
 import treblewallet.bitbox.util.BitBoxUtil;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 
 public class BitboxClientTest {
 
@@ -97,6 +97,7 @@ public class BitboxClientTest {
         String keyPath = "m/44h/0h/0/0/0";
         PubKeyDTO publicKey = client.xpub(keyPath);
         DeterministicKey key = DeterministicKey.deserializeB58(publicKey.getXpub(), MainNetParams.get());
+        log.info("mainnet key: {}", key.toString());
     }
 
     /**
@@ -193,7 +194,6 @@ public class BitboxClientTest {
         Script redeemScript = ScriptBuilder.createMultiSigOutputScript(2, keys);
         Script scriptPubKey = ScriptBuilder.createP2SHOutputScript(redeemScript);
         Address address = Address.fromP2SHScript(params, scriptPubKey);
-        String redeemScriptString = Utils.HEX.encode(redeemScript.getProgram());
         String addressString = address.toBase58();
         System.out.println(addressString);
         Transaction previousTransaction = new Transaction(params, Utils.HEX.decode(rawTransaction));
@@ -236,6 +236,13 @@ public class BitboxClientTest {
         System.out.println("RAW TRANSACTION AFTER 2ND SIGNATURE: " + Utils.HEX.encode(transaction.bitcoinSerialize()));
     }
 
+    /**
+     * to make this work run it, get the address, fill this address w money, adapt rawTransaction and the index of the utxos.
+     * 
+     * then run it.
+     * 
+     * @throws Exception
+     */
     @Test
     public void testCreatingMultisigAddress1() throws Exception {
         NetworkParameters params = TestNet3Params.get();
@@ -250,7 +257,6 @@ public class BitboxClientTest {
         Script redeemScript = ScriptBuilder.createMultiSigOutputScript(2, keys);
         Script scriptPubKey = ScriptBuilder.createP2SHOutputScript(redeemScript);
         Address address = Address.fromP2SHScript(params, scriptPubKey);
-        String redeemScriptString = Utils.HEX.encode(redeemScript.getProgram());
         String addressString = address.toBase58();
         System.out.println(addressString);
         Transaction previousTransaction = new Transaction(params, Utils.HEX.decode(rawTransaction));
@@ -282,13 +288,11 @@ public class BitboxClientTest {
 
         List<HashKeyPathDTO> hashArray = new ArrayList<HashKeyPathDTO>();
         hashArray.add(new HashKeyPathDTO(sighash2.toString(), KEY_PATH));
-        List pubKeyArray = new ArrayList();
+        List<PubKeyPathDTO> pubKeyArray = new ArrayList<PubKeyPathDTO>();
         SignDTO signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
         signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
-        String rString = signDTO.getSign()[0].getSig().substring(0, 64);
-        String sString = signDTO.getSign()[0].getSig().substring(64, 128);
-        BigInteger r = new BigInteger(Utils.HEX.decode(rString));
-        BigInteger s = new BigInteger(Utils.HEX.decode(sString));
+        BigInteger r = BitBoxUtil.getRFromSig(signDTO.getSign()[0].getSig());
+        BigInteger s = BitBoxUtil.getSFromSig(signDTO.getSign()[0].getSig());
         org.bitcoinj.core.ECKey.ECDSASignature signature2 = new org.bitcoinj.core.ECKey.ECDSASignature(r, s);
         // Add the second signature to the signature list
         signature = new TransactionSignature(signature2, Transaction.SigHash.ALL, false);
@@ -299,6 +303,13 @@ public class BitboxClientTest {
         System.out.println("RAW TRANSACTION AFTER 2ND SIGNATURE: " + Utils.HEX.encode(transaction.bitcoinSerialize()));
     }
 
+    /**
+     * to make this work run it, get the address, fill this address w money, adapt rawTransaction and the index of the utxos.
+     * 
+     * then run it.
+     * 
+     * @throws Exception
+     */
     @Test
     public void testCreatingMultisigAddress1OutOf3() throws Exception {
         NetworkParameters params = TestNet3Params.get();
@@ -313,7 +324,6 @@ public class BitboxClientTest {
         Script redeemScript = ScriptBuilder.createMultiSigOutputScript(1, keys);
         Script scriptPubKey = ScriptBuilder.createP2SHOutputScript(redeemScript);
         Address address = Address.fromP2SHScript(params, scriptPubKey);
-        String redeemScriptString = Utils.HEX.encode(redeemScript.getProgram());
         String addressString = address.toBase58();
         System.out.println(addressString);
         Transaction previousTransaction = new Transaction(params, Utils.HEX.decode(rawTransaction));
@@ -329,9 +339,8 @@ public class BitboxClientTest {
 
         List<HashKeyPathDTO> hashArray = new ArrayList<HashKeyPathDTO>();
         hashArray.add(new HashKeyPathDTO(sighash2.toString(), KEY_PATH));
-        List pubKeyArray = new ArrayList();
-        SignDTO signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
-        signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
+        SignDTO signDTO = client.sign("secp256k1", null, hashArray, new ArrayList<PubKeyPathDTO>());
+        signDTO = client.sign("secp256k1", null, hashArray, new ArrayList<PubKeyPathDTO>());
         String rString = signDTO.getSign()[0].getSig().substring(0,64);
         String sString = signDTO.getSign()[0].getSig().substring(64,128);
         BigInteger r = new BigInteger(Utils.HEX.decode(rString));
@@ -339,7 +348,7 @@ public class BitboxClientTest {
         org.bitcoinj.core.ECKey.ECDSASignature signature2 = new org.bitcoinj.core.ECKey.ECDSASignature(r,s);
         // Add the second signature to the signature list
         TransactionSignature signature = new TransactionSignature(signature2, Transaction.SigHash.ALL, false);
-        List signatures = new ArrayList();
+        List<TransactionSignature> signatures = new ArrayList<TransactionSignature>();
         signatures.add(signature);
         Script inputScript = ScriptBuilder.createP2SHMultiSigInputScript(signatures, redeemScript);
         transaction.getInput(0).setScriptSig(inputScript);
@@ -377,9 +386,8 @@ public class BitboxClientTest {
 
         List<HashKeyPathDTO> hashArray = new ArrayList<HashKeyPathDTO>();
         hashArray.add(new HashKeyPathDTO(sighash.toString(), KEY_PATH));
-        List pubKeyArray = new ArrayList();
-        SignDTO signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
-        signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
+        SignDTO signDTO = client.sign("secp256k1", null, hashArray, new ArrayList<PubKeyPathDTO>());
+        signDTO = client.sign("secp256k1", null, hashArray, new ArrayList<PubKeyPathDTO>());
         String rString = signDTO.getSign()[0].getSig().substring(0,64);
         String sString = signDTO.getSign()[0].getSig().substring(64,128);
         BigInteger r = new BigInteger(Utils.HEX.decode(rString));
@@ -403,9 +411,8 @@ public class BitboxClientTest {
     public void differentSignatureCheck() {
         List<HashKeyPathDTO> hashArray = new ArrayList<HashKeyPathDTO>();
         hashArray.add(new HashKeyPathDTO("60305383ad4d48c03c75cba5d9abe52ee854576517d4ef46fe1bc092f17dc962", "m/44p/1/0/0/5"));
-        List pubKeyArray = new ArrayList();
-        SignDTO signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
-        signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
+        SignDTO signDTO = client.sign("secp256k1", null, hashArray, new ArrayList<PubKeyPathDTO>());
+        signDTO = client.sign("secp256k1", null, hashArray, new ArrayList<PubKeyPathDTO>());
         System.out.println(signDTO.getSign()[0].getSig());
     }
 
@@ -414,15 +421,14 @@ public class BitboxClientTest {
     public void changingPath() {
         List<HashKeyPathDTO> hashArray = new ArrayList<HashKeyPathDTO>();
         hashArray.add(new HashKeyPathDTO("60305383ad4d48c03c75cba5d9abe52ee854576517d4ef46fe1bc092f17dc962", "m/44p/1/0/0/8"));
-        List pubKeyArray = new ArrayList();
-        SignDTO signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
-        signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
+        SignDTO signDTO = client.sign("secp256k1", null, hashArray, new ArrayList<PubKeyPathDTO>());
+        signDTO = client.sign("secp256k1", null, hashArray, new ArrayList<PubKeyPathDTO>());
         assertNotEquals("0c43b025a883a42e728d292fae06a2fe2c3e773571340db7c873867aa6b7c263086df7561a85d3bb37e9a243ab32a0723f534fd951da14944291128ae9323e2c", signDTO.getSign()[0].getSig());
 
         hashArray = new ArrayList<>();
         hashArray.add(new HashKeyPathDTO("60305383ad4d48c03c75cba5d9abe52ee854576517d4ef46fe1bc092f17dc962", "m/44p/1/0/0/5"));
-        signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
-        signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
+        signDTO = client.sign("secp256k1", null, hashArray, new ArrayList<PubKeyPathDTO>());
+        signDTO = client.sign("secp256k1", null, hashArray, new ArrayList<PubKeyPathDTO>());
         assertEquals("0c43b025a883a42e728d292fae06a2fe2c3e773571340db7c873867aa6b7c263086df7561a85d3bb37e9a243ab32a0723f534fd951da14944291128ae9323e2c", signDTO.getSign()[0].getSig());
 
 
