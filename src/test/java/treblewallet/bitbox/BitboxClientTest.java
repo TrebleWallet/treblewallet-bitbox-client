@@ -33,6 +33,7 @@ import treblewallet.bitbox.pojo.InfoDTO;
 import treblewallet.bitbox.pojo.PubKeyDTO;
 import treblewallet.bitbox.pojo.PubKeyPathDTO;
 import treblewallet.bitbox.pojo.SignDTO;
+import treblewallet.bitbox.util.BitBoxUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -220,13 +221,11 @@ public class BitboxClientTest {
 
         List<HashKeyPathDTO> hashArray = new ArrayList<HashKeyPathDTO>();
         hashArray.add(new HashKeyPathDTO(sighash2.toString(), KEY_PATH));
-        List pubKeyArray = new ArrayList();
+        List<PubKeyPathDTO> pubKeyArray = new ArrayList<PubKeyPathDTO>();
         SignDTO signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
         signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
-        String rString = signDTO.getSign()[0].getSig().substring(0,64);
-        String sString = signDTO.getSign()[0].getSig().substring(64,128);
-        BigInteger r = new BigInteger(Utils.HEX.decode(rString));
-        BigInteger s = new BigInteger(Utils.HEX.decode(sString));
+        BigInteger r = BitBoxUtil.getRFromSig(signDTO.getSign()[0].getSig());
+        BigInteger s = BitBoxUtil.getSFromSig(signDTO.getSign()[0].getSig());
         org.bitcoinj.core.ECKey.ECDSASignature signature2 = new org.bitcoinj.core.ECKey.ECDSASignature(r,s);
         // Add the second signature to the signature list
         signature = new TransactionSignature(signature2, Transaction.SigHash.ALL, false);
