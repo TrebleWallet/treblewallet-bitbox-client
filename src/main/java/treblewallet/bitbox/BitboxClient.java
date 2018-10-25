@@ -55,9 +55,9 @@ public class BitboxClient {
 	private String runCmd(String command, Map<String, String> parameters) throws BitBoxException {
 		StringBuffer output = new StringBuffer();
 		StringBuffer stdErr = new StringBuffer();
+		StringBuffer cmd = new StringBuffer();
 		try {
 			// build command
-			StringBuffer cmd = new StringBuffer();
 			cmd.append(BITBOX_CLI_LOCATION).append(" ");
 			String passwordParameter = "-password=\"" + password + "\"";
 			cmd.append(passwordParameter).append(" ");
@@ -66,7 +66,7 @@ public class BitboxClient {
 				cmd.append("-").append(key).append("=").append(parameters.get(key)).append(" ");
 			}
 
-			// Run the cmd string as a Windows command
+			// Run the cmd string as a OS command
 			log.info("running {}", cmd);
 			Process process = Runtime.getRuntime().exec(cmd.toString());
 
@@ -90,6 +90,7 @@ public class BitboxClient {
 				stdErr.append(s);
 			}
 		} catch (Exception e) {
+			log.error("error running: {}", cmd, e);
 			throw new BitBoxException("Standard error from Bitbox CLI: " + stdErr.toString(), e);
 		} finally {
 			if (stdErr != null && stdErr.length() > 0) {
