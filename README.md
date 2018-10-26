@@ -8,3 +8,6 @@ The CLI executables can be found here: https://digitalbitbox.com/download/client
 The API description for the Bitbox is here: https://shiftcrypto.ch/api
 
 Tested with Bitbox firmware version 3 or newer.
+
+To test the HSM, run the JUnit test. Adapt the path of BITBOX_CLI_LOCATION to where you installed the Bitbox CLI command and set its 
+password to HSM_PASSWORD variable.
