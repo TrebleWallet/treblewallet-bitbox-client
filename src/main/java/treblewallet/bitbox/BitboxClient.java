@@ -90,7 +90,7 @@ public class BitboxClient {
 				stdErr.append(s);
 			}
 		} catch (Exception e) {
-			log.error("error running: {}", cmd, e);
+			log.error("error running: {}: {}", cmd, stdErr.toString(), e);
 			throw new BitBoxException("Standard error from Bitbox CLI: " + stdErr.toString(), e);
 		} finally {
 			if (stdErr != null && stdErr.length() > 0) {
