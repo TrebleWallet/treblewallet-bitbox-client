@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import treblewallet.bitbox.pojo.HashKeyPathDTO;
 import treblewallet.bitbox.pojo.PubKeyDTO;
+import treblewallet.bitbox.pojo.PubKeyPathDTO;
 import treblewallet.bitbox.pojo.SignDTO;
 import treblewallet.bitbox.util.BitBoxUtil;
 
@@ -63,13 +64,13 @@ public class BitBoxBitcoinCoreTest {
         client = new BitboxClient(HSM_PASSWORD, BITBOX_CLI_LOCATION);
         params = TestNet3Params.get();
         KEY_PATH = "m/44p/1/0/0/9";
-        org.bitcoinj.core.ECKey publicKey1 = org.bitcoinj.core.ECKey.fromPublicOnly(Utils.HEX.decode(config.clientPublicKey1.toLowerCase()));
+        org.bitcoinj.core.ECKey publicKey1 = org.bitcoinj.core.ECKey.fromPublicOnly(Utils.HEX.decode(BitcoinCoreConfig.clientPublicKey1.toLowerCase()));
         PubKeyDTO pubKeyDTO = client.xpub(KEY_PATH);
         ExtendedKey extendedKey = ExtendedKey.parse(pubKeyDTO.getXpub(), false);
         org.bitcoinj.core.ECKey publicKey2 = org.bitcoinj.core.ECKey.fromPublicOnly(extendedKey.getPublic());
         System.out.println("PUBLIC KEY 2: " + publicKey2.getPublicKeyAsHex());
         System.out.println("PUBLIC EXTENDED KEY 2: " + publicKey2.decompress().getPublicKeyAsHex());
-        org.bitcoinj.core.ECKey publicKey3 = org.bitcoinj.core.ECKey.fromPublicOnly(Utils.HEX.decode(config.clientPublicKey3.toLowerCase()));
+        org.bitcoinj.core.ECKey publicKey3 = org.bitcoinj.core.ECKey.fromPublicOnly(Utils.HEX.decode(BitcoinCoreConfig.clientPublicKey3.toLowerCase()));
         List<ECKey> keys = ImmutableList.of(publicKey1, publicKey3, publicKey2);
         redeemScript = ScriptBuilder.createMultiSigOutputScript(2, keys);
         Script scriptPubKey = ScriptBuilder.createP2SHOutputScript(redeemScript);
@@ -132,9 +133,8 @@ public class BitBoxBitcoinCoreTest {
 
         List<HashKeyPathDTO> hashArray = new ArrayList<HashKeyPathDTO>();
         hashArray.add(new HashKeyPathDTO(sighash.toString(), KEY_PATH));
-        List pubKeyArray = new ArrayList();
-        SignDTO signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
-        signDTO = client.sign("secp256k1", null, hashArray, pubKeyArray);
+        SignDTO signDTO = client.sign("secp256k1", null, hashArray, new ArrayList<PubKeyPathDTO>());
+        signDTO = client.sign("secp256k1", null, hashArray, new ArrayList<PubKeyPathDTO>());
         BigInteger r = BitBoxUtil.getRFromSig(signDTO.getSign()[0].getSig());
         BigInteger s = BitBoxUtil.getSFromSig(signDTO.getSign()[0].getSig());
         org.bitcoinj.core.ECKey.ECDSASignature signature2 = new org.bitcoinj.core.ECKey.ECDSASignature(r, s);
