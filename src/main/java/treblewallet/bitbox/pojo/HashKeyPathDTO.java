@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import treblewallet.bitbox.util.BitBoxUtil;
+import treblewallet.bitbox.util.OSValidator;
 
 /*
  * Created by Robert Juhas on 7/24/2018
@@ -40,10 +41,6 @@ public class HashKeyPathDTO {
 		this.keypath = keypath;
 	}
 
-	public String toCLIString() {
-		return toCLIString(true);
-	}
-
 	public String toCLIString(boolean isWindows) {
 		StringBuffer sb = new StringBuffer();
 		sb.append('{');
@@ -57,7 +54,7 @@ public class HashKeyPathDTO {
 
 	@Override
 	public String toString() {
-		return toCLIString();
+		return toCLIString(OSValidator.isWindows());
 	}
 
 	public static void main(String[] args) throws JsonProcessingException {
