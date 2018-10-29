@@ -11,8 +11,10 @@ import treblewallet.bitbox.pojo.InfoDTO;
 import treblewallet.bitbox.pojo.PubKeyDTO;
 import treblewallet.bitbox.pojo.PubKeyPathDTO;
 import treblewallet.bitbox.pojo.SignDTO;
+import treblewallet.bitbox.util.OSValidator;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -59,7 +61,7 @@ public class BitboxClient {
 		try {
 			// build command
 			cmd.append(BITBOX_CLI_LOCATION).append(" ");
-			String passwordParameter = "-password=\"" + password + "\"";
+			String passwordParameter = "-password=" + password;
 			cmd.append(passwordParameter).append(" ");
 			cmd.append(command).append(" ");
 			for (String key : parameters.keySet()) {
@@ -68,7 +70,15 @@ public class BitboxClient {
 
 			// Run the cmd string as a OS command
 			log.info("running {}", cmd);
-			Process process = Runtime.getRuntime().exec(cmd.toString());
+			Process process = null;
+			if (OSValidator.isUnix()) {
+				ClassLoader classLoader = getClass().getClassLoader();
+				File file = new File(classLoader.getResource("run-hsm-command.sh").getFile());
+				process = Runtime.getRuntime().exec(file.getPath() + " " + cmd);
+			} else if (OSValidator.isWindows()) {
+				process = Runtime.getRuntime().exec(cmd.toString());
+			}
+
 
 			// Get input streams
 			BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
