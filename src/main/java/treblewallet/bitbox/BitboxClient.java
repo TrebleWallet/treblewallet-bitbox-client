@@ -109,6 +109,7 @@ public class BitboxClient {
 			throw new BitBoxException("Standard error from Bitbox CLI: " + stdErr.toString(), e);
 		} finally {
 			if (stdErr != null && stdErr.length() > 0) {
+				log.error("Output error: {}", stdErr.toString());
 				throw new BitBoxException("Standard error from Bitbox CLI: " + stdErr.toString());
 			}
 		}
