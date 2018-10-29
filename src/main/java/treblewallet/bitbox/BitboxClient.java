@@ -87,12 +87,16 @@ public class BitboxClient {
 			// Read command standard output
 			String s;
 			while ((s = stdInput.readLine()) != null) {
+				if (OSValidator.isUnix() && s.startsWith("$*")) {
+					continue;
+				}
 				if (s.startsWith("result:")) {
 					s = "{";
 				}
 				output.append(s);
 				System.out.println(s);
 			}
+
 			log.info("Result for {}: {}", command, output.toString());
 
 			// Read command errors
