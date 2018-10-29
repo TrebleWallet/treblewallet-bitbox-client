@@ -59,6 +59,7 @@ public class BitboxClient {
 		
 		this.password = password;
 		this.BITBOX_CLI_LOCATION = bitboxCLILocation;
+		this.scriptLocation = scriptLocation;
 	}
 
 	private String runCmd(String command, Map<String, String> parameters) throws BitBoxException {

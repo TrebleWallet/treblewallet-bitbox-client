@@ -63,19 +63,17 @@ public class BitboxClientTest {
     private static String HSM_PASSWORD = "0000";
     private static String scriptLocation;
 
-    static {
-        try {
-            scriptLocation = new File(BitboxClient.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParent() + File.separator + "run-hsm-command.sh";
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-    }
-
     public BitboxClientTest() {
     }
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        try {
+            scriptLocation = new File(BitboxClient.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParent() + File.separator + "run-hsm-command.sh";
+            Runtime.getRuntime().exec("chmod u+x " + scriptLocation);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
         client = new BitboxClient(HSM_PASSWORD, BITBOX_CLI_LOCATION, scriptLocation);
     }
 
