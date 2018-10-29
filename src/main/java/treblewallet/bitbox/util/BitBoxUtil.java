@@ -11,7 +11,7 @@ public class BitBoxUtil {
 	 * Linux: "key":"value"
 	 */
 	public static final String WINDOWS_ESC_QUOTE = "\"\"\"";
-	public static final String UNIX_ESC_QUOTE = "\"";
+	public static final String UNIX_ESC_QUOTE = "\\\"";
 	private static final String quote = OSValidator.isWindows() ? WINDOWS_ESC_QUOTE : UNIX_ESC_QUOTE;
 
 	public static String createKeyValuePairCLI(String key, String value, String quote) {
