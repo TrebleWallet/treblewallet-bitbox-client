@@ -39,17 +39,24 @@ public class BitboxClient {
 	private Logger log = LoggerFactory.getLogger(BitboxClient.class);
 	private String BITBOX_CLI_LOCATION;
 	private String password;
+	private String scriptLocation;
 
 	static ObjectMapper objectMapper = new ObjectMapper();
 
-	public BitboxClient(String password, String bitboxCLILocation) throws BitBoxException{
+	public BitboxClient(String password, String bitboxCLILocation, String scriptLocation) throws BitBoxException{
 		super();
 		if (password == null || password.isEmpty()) {
 			throw new BitBoxException("Password cannot be null or empty.");
 		}
+		
 		if (bitboxCLILocation == null || bitboxCLILocation.isEmpty()) {
 			throw new BitBoxException("Path to the BitBoxCLI cannot be null or empty.");
 		}
+		
+		if (OSValidator.isUnix() && (scriptLocation == null || scriptLocation.isEmpty())) {
+			throw new BitBoxException("There is not script for executing the bitbox commands on  the *NIX systems");
+		}
+		
 		this.password = password;
 		this.BITBOX_CLI_LOCATION = bitboxCLILocation;
 	}
@@ -72,10 +79,7 @@ public class BitboxClient {
 			log.info("running {}", cmd);
 			Process process = null;
 			if (OSValidator.isUnix()) {
-				ClassLoader classLoader = getClass().getClassLoader();
-				File file = new File(classLoader.getResource("run-hsm-command.sh").getFile());
-				Runtime.getRuntime().exec("chmod u+x " + file.getAbsolutePath());
-				process = Runtime.getRuntime().exec(file.getPath() + " " + cmd);
+				process = Runtime.getRuntime().exec(scriptLocation + " " + cmd);
 			} else if (OSValidator.isWindows()) {
 				process = Runtime.getRuntime().exec(cmd.toString());
 			}

@@ -49,7 +49,7 @@ public class BitBoxBitcoinCoreTest {
 
     static BitcoindInterface bitcoinCoreClient;
     static BitcoinCoreConfig config;
-    static final String BITBOX_CLI_LOCATION = "C:\\Work\\Projects\\TrebleWallet\\TrebleWallet\\BitBox_CLI_3.0.0_Win64.exe";
+    private static final String BITBOX_CLI_LOCATION = "/home/robert/treblewallet-hsm/BitBox_CLI_3.0.0_Linux64";
 
     private static BitboxClient client;
     private static String HSM_PASSWORD = "0000";
@@ -69,7 +69,7 @@ public class BitBoxBitcoinCoreTest {
             e.printStackTrace();
             assumeTrue(false);
         }
-        client = new BitboxClient(HSM_PASSWORD, BITBOX_CLI_LOCATION);
+        client = new BitboxClient(HSM_PASSWORD, BITBOX_CLI_LOCATION, null);
         params = TestNet3Params.get();
         KEY_PATH = "m/44p/1/0/0/9";
         org.bitcoinj.core.ECKey publicKey1 = org.bitcoinj.core.ECKey.fromPublicOnly(Utils.HEX.decode(BitcoinCoreConfig.clientPublicKey1.toLowerCase()));

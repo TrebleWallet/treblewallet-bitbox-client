@@ -52,17 +52,18 @@ public class BitboxClientTest {
 
     private static final String KEY_PATH = "m/44p/1/0/0/1";
 
-    private static final String BITBOX_CLI_LOCATION = "C:\\Work\\Projects\\TrebleWallet\\TrebleWallet\\BitBox_CLI_3.0.0_Win64.exe";
+    private static final String BITBOX_CLI_LOCATION = "/home/robert/treblewallet-hsm/BitBox_CLI_3.0.0_Linux64";
 
     private static final String TEST_HASH = "f6f4a3633eda92eef9dd96858dec2f5ea4dfebb67adac879c964194eb3b97d79";
     static Random rand = new Random();
     private static Logger log = LoggerFactory.getLogger(BitboxClientTest.class);
     private static BitboxClient client;
     private static String HSM_PASSWORD = "0000";
+    private String scriptLocation = this.getClass().getResource("run-hsm-command.sh").getPath();
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        client = new BitboxClient(HSM_PASSWORD, BITBOX_CLI_LOCATION);
+        client = new BitboxClient(HSM_PASSWORD, BITBOX_CLI_LOCATION, "");
     }
 
     @AfterClass
@@ -452,33 +453,34 @@ public class BitboxClientTest {
 
     @Test(expected = BitBoxException.class)
     public void testNullPassword() throws BitBoxException {
-        new BitboxClient(null,null);
+    	int x = 0;
+        new BitboxClient(null,null,scriptLocation);
     }
 
     @Test(expected = BitBoxException.class)
     public void testEmptyPassword() throws BitBoxException {
-        new BitboxClient("",null);
+        new BitboxClient("",null,null);
     }
 
     @Test(expected = BitBoxException.class)
     public void testNullPath() throws BitBoxException {
-        new BitboxClient(HSM_PASSWORD,null);
+        new BitboxClient(HSM_PASSWORD,null,null);
     }
 
     @Test(expected = BitBoxException.class)
     public void testEmptyPath() throws BitBoxException {
-        new BitboxClient(HSM_PASSWORD,"");
+        new BitboxClient(HSM_PASSWORD,"",null);
     }
 
     @Test(expected = BitBoxException.class)
     public void testWrongPassword() throws BitBoxException {
-        BitboxClient client = new BitboxClient("1234","somepath");
+        BitboxClient client = new BitboxClient("1234","somepath",null);
         client.info();
     }
 
     @Test(expected = BitBoxException.class)
     public void testWrongPath() throws BitBoxException {
-        BitboxClient client = new BitboxClient(HSM_PASSWORD,"somepath");
+        BitboxClient client = new BitboxClient(HSM_PASSWORD,"somepath",null);
         client.info();
     }
 
