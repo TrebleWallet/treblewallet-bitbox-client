@@ -74,6 +74,7 @@ public class BitboxClient {
 			if (OSValidator.isUnix()) {
 				ClassLoader classLoader = getClass().getClassLoader();
 				File file = new File(classLoader.getResource("run-hsm-command.sh").getFile());
+				Runtime.getRuntime().exec("chmod u+x " + file.getAbsolutePath());
 				process = Runtime.getRuntime().exec(file.getPath() + " " + cmd);
 			} else if (OSValidator.isWindows()) {
 				process = Runtime.getRuntime().exec(cmd.toString());
