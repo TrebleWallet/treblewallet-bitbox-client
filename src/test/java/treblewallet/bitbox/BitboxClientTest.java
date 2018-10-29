@@ -47,6 +47,7 @@ import treblewallet.bitbox.pojo.PubKeyDTO;
 import treblewallet.bitbox.pojo.PubKeyPathDTO;
 import treblewallet.bitbox.pojo.SignDTO;
 import treblewallet.bitbox.util.BitBoxUtil;
+import treblewallet.bitbox.util.OSValidator;
 
 public class BitboxClientTest {
 
@@ -69,8 +70,10 @@ public class BitboxClientTest {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         try {
-            scriptLocation = new File(BitboxClient.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParent() + File.separator + "run-hsm-command.sh";
-            Runtime.getRuntime().exec("chmod u+x " + scriptLocation);
+            if (OSValidator.isUnix()) {
+                scriptLocation = new File(BitboxClient.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParent() + File.separator + "run-hsm-command.sh";
+                Runtime.getRuntime().exec("chmod u+x " + scriptLocation);
+            }
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
