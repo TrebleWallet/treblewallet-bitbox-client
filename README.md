@@ -11,3 +11,4 @@ Tested with Bitbox firmware version 3 or newer.
 
 To test the HSM, run the JUnit test. Adapt the path of BITBOX_CLI_LOCATION to where you installed the Bitbox CLI command and set its 
 password to HSM_PASSWORD variable.
+Also, set the scriptLocation parameter of the BitboxClient constructor in case you are running on the Linux. Once build (at least validate) script for could be found in the target folder. 
