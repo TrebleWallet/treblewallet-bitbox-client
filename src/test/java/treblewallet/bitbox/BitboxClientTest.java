@@ -4,8 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,11 +61,22 @@ public class BitboxClientTest {
     private static Logger log = LoggerFactory.getLogger(BitboxClientTest.class);
     private static BitboxClient client;
     private static String HSM_PASSWORD = "0000";
-    private String scriptLocation = this.getClass().getResource("run-hsm-command.sh").getPath();
+    private static String scriptLocation;
+
+    static {
+        try {
+            scriptLocation = new File(BitboxClient.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParent() + File.separator + "run-hsm-command.sh";
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public BitboxClientTest() {
+    }
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        client = new BitboxClient(HSM_PASSWORD, BITBOX_CLI_LOCATION, "");
+        client = new BitboxClient(HSM_PASSWORD, BITBOX_CLI_LOCATION, scriptLocation);
     }
 
     @AfterClass
