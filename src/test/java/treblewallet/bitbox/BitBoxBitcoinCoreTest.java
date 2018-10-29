@@ -39,6 +39,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.junit.Assume.assumeTrue;
+
 /*
  * Created by Robert Juhas on 10/24/2018
  */
@@ -61,6 +63,12 @@ public class BitBoxBitcoinCoreTest {
     public static void setup() throws Exception {
         config = new BitcoinCoreConfig();
         bitcoinCoreClient = config.getClient();
+        try{
+            bitcoinCoreClient.getblockchaininfo();
+        } catch (Exception e) {
+            e.printStackTrace();
+            assumeTrue(false);
+        }
         client = new BitboxClient(HSM_PASSWORD, BITBOX_CLI_LOCATION);
         params = TestNet3Params.get();
         KEY_PATH = "m/44p/1/0/0/9";
