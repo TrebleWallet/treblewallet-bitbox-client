@@ -62,7 +62,7 @@ public class BitboxClient {
 		this.scriptLocation = scriptLocation;
 	}
 
-	private String runCmd(String command, Map<String, String> parameters) throws BitBoxException {
+	private synchronized String runCmd(String command, Map<String, String> parameters) throws BitBoxException {
 		StringBuffer output = new StringBuffer();
 		StringBuffer stdErr = new StringBuffer();
 		StringBuffer cmd = new StringBuffer();
